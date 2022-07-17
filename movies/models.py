@@ -20,6 +20,10 @@ class Actor(models.Model):
     name = models.CharField("Имя", max_length=100)
     age = models.PositiveSmallIntegerField("Возраст", default=0)
     description = models.TextField("Описание")
+    location = models.CharField("Место рождения", max_length=200, null=True)
+    partner = models.CharField("Партнер", max_length=100, null=True)
+    parents = models.CharField("Родители", max_length=100, null=True)
+    children = models.CharField("Дети", max_length=100, null=True)
     image = models.ImageField("Изображение", upload_to='actors/')
 
     def __str__(self):
@@ -31,7 +35,7 @@ class Actor(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField("Имя", max_length=100)
+    name = models.CharField("Название", max_length=100)
     description = models.TextField("Описание")
     url = models.SlugField(max_length=160, unique=True)
 
@@ -45,7 +49,7 @@ class Genre(models.Model):
 
 class Movie(models.Model):
     title = models.CharField("Название", max_length=100)
-    tagline = models.CharField("Слоган", max_length=100, default='')
+    tagline = models.CharField("Слоган", max_length=100, default='', null=True)
     poster = models.ImageField("Постер", upload_to='movies/')
     year = models.PositiveSmallIntegerField("Дата выхода", default=2018)
     country = models.CharField("Страна", max_length=30)
@@ -67,4 +71,57 @@ class Movie(models.Model):
         verbose_name = 'Фильм'
         verbose_name_plural = 'Фильмы'
 
+
+class MovieShots(models.Model):
+    """Кадры из фильма"""
+    title = models.CharField("Заголовок", max_length=100)
+    descriptions = models.TextField("Описание")
+    image = models.ImageField("Изображение", upload_to='movie_shots/')
+    movie = models.ForeignKey(Movie, verbose_name='Фильм', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Кадр из фильма'
+        verbose_name_plural = 'Кадры из фильма'
+
+
+class RatingStar(models.Model):
+    """Звезды рейтинга"""
+    value = models.SmallIntegerField('Значение', default=0)
+
+    def __str__(self):
+        return self.value
+
+    class Meta:
+        verbose_name = 'Звезда рейтинга'
+        verbose_name_plural = 'Звезды рейтинга'
+
+
+class Rating(models.Model):
+    ip = models.CharField("IP-адрес", max_length=15)
+    star = models.ForeignKey(RatingStar, verbose_name='Звезда', on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, verbose_name='Фильм', on_delete=models.CharField)
+
+    def __str__(self):
+        return f'{self.star} - {self.movie}'
+
+    class Meta:
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'
+
+
+class Reviews(models.Model):
+    email = models.EmailField()
+    name = models.CharField("Имя", max_length=100)
+    text = models.CharField("Сообщение", max_length=5000)
+    movie = models.ForeignKey(Movie, verbose_name="Фильм", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.name} - {self.movie}'
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
 
